@@ -1,1 +1,1 @@
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://inmedica.in').replace(/\/$/, '');
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.inmedicadevices.com').replace(/\/$/, '');
