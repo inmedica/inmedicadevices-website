@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.env
+.env.local
+*.tsbuildinfo
+next-env.d.ts
+
+# Versioned backup zips (too large for GitHub; kept locally)
+*.zip
+
+# Local tooling
+.claude/
