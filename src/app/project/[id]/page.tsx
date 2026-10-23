@@ -6,24 +6,28 @@ import { EquipmentList } from '@/components/projects/EquipmentList';
 import { EnquiryButton } from '@/components/ui/EnquiryButton';
 import { Icon } from '@/components/ui/Icon';
 import { getProject, getProjects } from '@/lib/catalog';
+import { isHidden } from '@/lib/cms';
+import { pageMeta, redirectOrNotFound } from '@/lib/seo';
 
 /* eslint-disable @next/next/no-img-element */
 
 type Props = { params: Promise<{ id: string }> };
 
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return getProjects().map(p => ({ id: p.id }));
+export async function generateStaticParams() {
+  return (await getProjects()).map(p => ({ id: p.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const p = getProject((await params).id);
-  return p ? { title: p.name, description: p.sub, openGraph: { images: [p.img] } } : {};
+  const { id } = await params;
+  const p = await getProject(id);
+  return p ? pageMeta(`/project/${id}`, { title: p.name, description: p.sub, openGraph: { images: [p.img] } }) : {};
 }
 
 export default async function ProjectPage({ params }: Props) {
-  const pj = getProject((await params).id);
-  if (!pj) notFound();
+  const { id } = await params;
+  const pj = await getProject(id);
+  if (await isHidden('solutions')) notFound();
+  if (!pj) return redirectOrNotFound(`/project/${id}`);
 
   return (
     <>

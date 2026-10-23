@@ -3,18 +3,22 @@ import Link from 'next/link';
 import { PageHero } from '@/components/layout/PageHero';
 import { EnquiryButton } from '@/components/ui/EnquiryButton';
 import { Icon } from '@/components/ui/Icon';
-import { getProjects } from '@/lib/catalog';
+import { notFound } from 'next/navigation';
+import { getContent, isHidden } from '@/lib/cms';
+import { pageMeta } from '@/lib/seo';
 
 /* eslint-disable @next/next/no-img-element */
 
-export const metadata: Metadata = { title: 'Hospital Projects', description: 'End-to-end solutions for every department and every stage of your hospital project.' };
+export const generateMetadata = (): Promise<Metadata> => pageMeta('/projects', { title: 'Hospital Projects', description: 'End-to-end solutions for every department and every stage of your hospital project.' });
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  if (await isHidden('solutions')) notFound();
+  const c = await getContent('solutions');
   return (
     <>
-      <PageHero title="Hospital Projects" sub="End-to-end solutions for every department and every stage of your hospital project." />
+      <PageHero title="Hospital Projects" sub={c.heroSub} />
       <section className="container projects-grid">
-        {getProjects().map(p => (
+        {c.projects.map(p => (
           <Link key={p.id} data-reveal href={`/project/${p.id}`} className="proj-card card-lift">
             <div className="proj-card-img"><img src={p.img} alt={p.name} loading="lazy" /></div>
             <div className="proj-card-body">
@@ -28,8 +32,8 @@ export default function ProjectsPage() {
       <section className="container" style={{ paddingBottom: 'clamp(48px,6vw,80px)' }}>
         <div data-reveal className="cta-band" style={{ background: 'var(--red)', color: '#fff' }}>
           <div style={{ maxWidth: 640 }}>
-            <div className="cta-band-title" style={{ fontSize: 'clamp(22px,2.52vw,31px)' }}>Planning a new hospital?</div>
-            <div className="cta-band-txt" style={{ color: '#ffe3e1' }}>We can support your equipment requirements from individual departments to complete hospital setup.</div>
+            <div className="cta-band-title" style={{ fontSize: 'clamp(22px,2.52vw,31px)' }}>{c.ctaTitle}</div>
+            <div className="cta-band-txt" style={{ color: '#ffe3e1' }}>{c.ctaText}</div>
           </div>
           <EnquiryButton type="quote" product="" message="Hospital project: New Hospital Solutions" className="btn btn-white-lift h56" style={{ color: 'var(--red)' }}>Discuss Your Hospital Project</EnquiryButton>
         </div>

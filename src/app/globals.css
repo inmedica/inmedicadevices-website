@@ -639,3 +639,21 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 700; margin: 0; }
 .client-tile:has(.client-logo) { height: 104px; }
 .marquee-chip.has-logo { padding: 0 22px; background: #fff; }
 .marquee-chip.has-logo img { height: 44px; width: auto; max-width: 150px; object-fit: contain; display: block; }
+
+/* ---------- testimonials (managed in the admin portal) ---------- */
+.testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+.testi-card { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 26px 24px; display: flex; flex-direction: column; gap: 16px; }
+.testi-mark { color: var(--red); font-size: 34px; }
+.testi-card blockquote { margin: 0; font-size: 15px; line-height: 1.7; color: var(--text-body); flex: 1; }
+.testi-card figcaption { display: flex; gap: 12px; align-items: center; }
+.testi-card figcaption img, .testi-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; }
+.testi-avatar { display: inline-flex; align-items: center; justify-content: center; background: var(--cyan-tint); color: var(--teal); font-weight: 700; font-size: 14px; }
+.testi-card figcaption b { display: block; color: var(--navy); font-family: var(--font-head); }
+.testi-card figcaption small { color: var(--muted); font-size: 13px; }
+
+/* ---------- legal pages ---------- */
+.legal { max-width: 820px; padding-top: clamp(36px, 5vw, 64px); padding-bottom: clamp(48px, 6vw, 80px); }
+.legal h2 { font-size: 20px; margin: 28px 0 10px; color: var(--navy); }
+.legal p, .legal li { font-size: 15px; line-height: 1.75; color: var(--text-body); }
+.legal ul { padding-left: 20px; margin: 0 0 12px; }
+.legal .updated { color: var(--muted); font-size: 13px; }

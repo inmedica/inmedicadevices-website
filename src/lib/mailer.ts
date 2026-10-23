@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { CONTACT } from '@/data/company';
+import { contactFrom, getSettings } from './cms';
 import { ENQUIRY_TYPES, type EnquiryInput } from './enquiry';
 
 export const isMailConfigured = () => !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
@@ -16,7 +16,12 @@ function transport() {
   });
 }
 
-const companyInbox = () => process.env.ENQUIRY_TO || CONTACT.email;
+/** Recipients set in the admin (Settings → Email notifications), else ENQUIRY_TO, else the company email. */
+async function companyInbox() {
+  const s = await getSettings();
+  const list = s.notifications.enquiryRecipients.filter(Boolean);
+  return list.length ? list.join(', ') : process.env.ENQUIRY_TO || s.contact.email;
+}
 const fromAddress = () => process.env.ENQUIRY_FROM || process.env.SMTP_USER;
 
 /** Notification to InMedica with the full enquiry. */
@@ -25,7 +30,7 @@ export async function sendEnquiryEmail(e: EnquiryInput) {
   const rows: [string, string][] = [['Type', kind], ['Name', e.name], ['Hospital / Organization', e.org], ['Mobile', e.mobile], ['Email', e.email], ['Product', e.product], ['Message', e.message]];
   await transport().sendMail({
     from: fromAddress(),
-    to: companyInbox(),
+    to: await companyInbox(),
     replyTo: e.email || undefined,
     subject: `${kind}: ${e.name}${e.product ? ' — ' + e.product : ''}`,
     text: rows.map(([k, v]) => `${k}: ${v || '-'}`).join('\n'),
@@ -36,6 +41,9 @@ export async function sendEnquiryEmail(e: EnquiryInput) {
 /** Acknowledgement to the customer — only when they gave an email address. */
 export async function sendCustomerConfirmation(e: EnquiryInput) {
   if (!e.email) return;
+  const settings = await getSettings();
+  if (!settings.notifications.customerConfirmation) return;
+  const CONTACT = contactFrom(settings);
   const meta = ENQUIRY_TYPES[e.type];
   const first = e.name.trim().replace(/\s+/g, ' ') || 'Sir / Madam';
   const summary: [string, string][] = [['Request', meta.name], ['Product(s)', e.product], ['Hospital / Organization', e.org], ['Your message', e.message]].filter(([, v]) => v) as [string, string][];
@@ -67,7 +75,7 @@ export async function sendCustomerConfirmation(e: EnquiryInput) {
   await transport().sendMail({
     from: fromAddress(),
     to: e.email,
-    replyTo: companyInbox(),
+    replyTo: await companyInbox(),
     subject: `We received your ${meta.noun} — InMedica Devices`,
     text,
     html,

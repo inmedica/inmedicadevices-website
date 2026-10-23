@@ -10,7 +10,8 @@ const EnquirySchema = new Schema(
     email: { type: String, trim: true, lowercase: true, maxlength: 200 },
     product: { type: String, trim: true, maxlength: 1000 },
     message: { type: String, trim: true, maxlength: 4000 },
-    status: { type: String, enum: ['new', 'contacted', 'closed'], default: 'new' },
+    // Pipeline statuses are managed in the admin portal ("closed" is the legacy value).
+    status: { type: String, enum: ['new', 'contacted', 'requirement', 'meeting', 'quotation', 'negotiation', 'won', 'lost', 'followup', 'closed'], default: 'new' },
     emailed: { type: Boolean, default: false },
     source: { type: String, maxlength: 500 },
   },

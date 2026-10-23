@@ -1,45 +1,44 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { ProductGallery } from '@/components/products/ProductGallery';
 import { SectionNav } from '@/components/products/SectionTabs';
 import { SpecTables } from '@/components/products/SpecTables';
 import { EnquiryButton, ToastButton } from '@/components/ui/EnquiryButton';
 import { Icon } from '@/components/ui/Icon';
 import { categoryName, getProduct, getProducts, getProductSections, getRelatedProducts } from '@/lib/catalog';
+import { getSite } from '@/lib/cms';
+import { pageMeta, redirectOrNotFound } from '@/lib/seo';
 
 /* eslint-disable @next/next/no-img-element */
 
 type Props = { params: Promise<{ id: string }> };
 
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return getProducts().map(p => ({ id: p.id }));
+export async function generateStaticParams() {
+  return (await getProducts()).map(p => ({ id: p.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const p = getProduct((await params).id);
+  const p = await getProduct((await params).id);
   if (!p) return {};
-  return {
+  return pageMeta(`/product/${p.id}`, {
     title: p.title,
     description: p.short,
-    alternates: { canonical: `/product/${p.id}` },
     openGraph: { title: p.title, description: p.short, images: p.imgs.length ? [p.imgs[0]] : undefined },
-  };
+  });
 }
 
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
-  const p = getProduct(id);
-  if (!p) notFound();
-  const catName = categoryName(p.cat);
+  const p = await getProduct(id);
+  if (!p) return redirectOrNotFound(`/product/${id}`);
+  const [catName, related, site] = await Promise.all([categoryName(p.cat), getRelatedProducts(p), getSite()]);
   const group = p.group && p.group !== catName ? p.group : null;
   const sections = getProductSections(p);
-  const related = getRelatedProducts(p);
+  const brand = p.brand ? site.brands.find(b => b.id === p.brand) : undefined;
 
   const jsonLd = {
     '@context': 'https://schema.org', '@type': 'Product', name: p.title, description: p.short, category: catName,
-    image: p.imgs, brand: { '@type': 'Organization', name: 'InMedica Devices' },
+    image: p.imgs, brand: { '@type': 'Brand', name: brand?.name ?? 'InMedica Devices' },
   };
 
   return (
@@ -54,7 +53,7 @@ export default async function ProductPage({ params }: Props) {
       </section>
 
       <section className="container pd-top">
-        <ProductGallery imgs={p.imgs} name={p.name} />
+        <ProductGallery imgs={p.imgs} alts={p.imgAlts} name={p.name} />
         <div data-reveal className="pd-info">
           <div className="badges">
             <span className="badge badge-red">{catName}</span>

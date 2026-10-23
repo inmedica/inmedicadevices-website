@@ -1,36 +1,36 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { PageHero } from '@/components/layout/PageHero';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Icon } from '@/components/ui/Icon';
 import { getCategories, getCategory, getProductGroups } from '@/lib/catalog';
+import { getContent } from '@/lib/cms';
+import { pageMeta, redirectOrNotFound } from '@/lib/seo';
 
 type Props = { params: Promise<{ category: string }> };
 
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return getCategories().map(c => ({ category: c.id }));
+export async function generateStaticParams() {
+  return (await getCategories()).map(c => ({ category: c.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cat = getCategory((await params).category);
+  const cat = await getCategory((await params).category);
   if (!cat) return {};
-  return { title: `${cat.name} Equipment`, description: `${cat.name} equipment from InMedica Devices — request a quote or product demo.`, openGraph: { images: [cat.img] } };
+  return pageMeta(`/products/${cat.id}`, { title: `${cat.name} Equipment`, description: `${cat.name} equipment from InMedica Devices — request a quote or product demo.`, openGraph: cat.img ? { images: [cat.img] } : undefined });
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { category } = await params;
-  const cat = getCategory(category);
-  if (!cat) notFound();
-  const groups = getProductGroups(cat.id);
+  const cat = await getCategory(category);
+  if (!cat) return redirectOrNotFound(`/products/${category}`);
+  const [groups, cats, page] = await Promise.all([getProductGroups(cat.id), getCategories(), getContent('products')]);
 
   return (
     <>
-      <PageHero title={cat.name} sub="Imaging | Critical Care | Operation Theatre | Hospital Furniture | Endoscopy | Laparoscopy" crumbs={[{ label: 'Products', href: '/products/imaging' }]} />
+      <PageHero title={cat.name} sub={page.heroSub} crumbs={[{ label: 'Products', href: '/products' }]} />
       <div className="subnav">
         <nav className="container subnav-row" aria-label="Product categories">
-          {getCategories().map(c => (
+          {cats.map(c => (
             <Link key={c.id} href={`/products/${c.id}`} className={'chip chip-hover' + (c.id === cat.id ? ' active' : '')} aria-current={c.id === cat.id ? 'page' : undefined}>
               <Icon name={c.icon} />{c.name}
             </Link>

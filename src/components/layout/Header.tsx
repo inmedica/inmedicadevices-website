@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { useUI } from '@/components/ui/UIProvider';
-import { CONTACT } from '@/data/company';
 import { MENU, activeMenuId } from './menu';
 
 export interface MegaColumn {
@@ -15,7 +14,7 @@ export interface MegaColumn {
   items: { id: string; name: string }[];
 }
 
-export function Header({ megaCols }: { megaCols: MegaColumn[] }) {
+export function Header({ megaCols, logo, contact }: { megaCols: MegaColumn[]; logo: string; contact: { phone: string; phoneHref: string; email: string } }) {
   const pathname = usePathname();
   const active = activeMenuId(pathname);
   const { openEnquiry } = useUI();
@@ -54,7 +53,7 @@ export function Header({ megaCols }: { megaCols: MegaColumn[] }) {
         <div className="container hdr-row">
           <Link href="/" className="hdr-logo" aria-label="InMedica Devices — Home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/logo.png" alt="InMedica Devices" />
+            <img src={logo || '/assets/logo.png'} alt="InMedica Devices" />
           </Link>
           <nav className="hdr-nav" aria-label="Main">
             {MENU.map(m => (
@@ -105,8 +104,8 @@ export function Header({ megaCols }: { megaCols: MegaColumn[] }) {
           ))}
         </div>
         <div className="mm-contact">
-          <a href={CONTACT.phoneHref} tabIndex={mm ? 0 : -1}><Icon name="call" />{CONTACT.phone}</a>
-          <a href={`mailto:${CONTACT.email}`} tabIndex={mm ? 0 : -1}><Icon name="mail" />{CONTACT.email}</a>
+          <a href={contact.phoneHref} tabIndex={mm ? 0 : -1}><Icon name="call" />{contact.phone}</a>
+          <a href={`mailto:${contact.email}`} tabIndex={mm ? 0 : -1}><Icon name="mail" />{contact.email}</a>
         </div>
       </div>
     </>

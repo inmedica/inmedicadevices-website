@@ -1,4 +1,5 @@
-export type CategoryId = 'imaging' | 'critical' | 'ot' | 'furniture' | 'endoscopy' | 'laparoscopy';
+/** Category slug (imaging, critical, ot, …). Categories are managed in the admin portal. */
+export type CategoryId = string;
 
 export interface Category {
   id: CategoryId;
@@ -45,6 +46,11 @@ export interface Product {
   name: string;
   title: string;
   imgs: string[];
+  /** Alt text per image (same order as imgs). */
+  imgAlts?: string[];
+  brand?: string;
+  /** Marked "Featured" in the admin (used when the homepage has no hand-picked list). */
+  featured?: boolean;
   brochure: string | null;
   short: string;
   desc?: string[];
