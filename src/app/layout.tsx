@@ -17,7 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: settings.seo.defaultTitle, template: '%s | InMedica Devices' },
     description: settings.seo.defaultDescription,
     openGraph: { type: 'website', siteName: settings.company.name, locale: 'en_IN', images: settings.seo.ogImage ? [settings.seo.ogImage] : undefined },
-    icons: { icon: '/assets/logo.png' },
     verification: settings.analytics.gscVerification ? { google: settings.analytics.gscVerification } : undefined,
   };
 }
